@@ -16,7 +16,7 @@ object CreadorUser {
                 id = id,
                 username = username,
                 correo = correo,
-                passwordHash = passwordHash
+                password = passwordHash
             )
             "organizador" -> Organizador(
                 id = id,
