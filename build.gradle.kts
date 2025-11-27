@@ -21,7 +21,7 @@ dependencies {
     // Spring Boot core
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     // MySQL connector
     runtimeOnly("com.mysql:mysql-connector-j")
 

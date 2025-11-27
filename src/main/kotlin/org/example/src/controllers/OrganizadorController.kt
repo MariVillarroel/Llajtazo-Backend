@@ -2,24 +2,24 @@ package org.example.src.controllers
 
 import org.example.src.dto.OrganizadorRequest
 import org.example.src.dto.OrganizadorResponse
+import org.example.src.dto.UpdateOrganizadorRequest
 import org.example.src.services.OrganizadorService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/organizadores")
 class OrganizadorController(private val service: OrganizadorService) {
 
     @PostMapping
-    fun crearOrganizador(@RequestBody request: OrganizadorRequest): ResponseEntity<OrganizadorResponse> {
-        val response = service.crearOrganizador(request)
-        return ResponseEntity.ok(response)
+    fun crearOrganizador(@RequestBody request: OrganizadorRequest): ResponseEntity<Any> {
+        return try {
+            val response = service.crearOrganizador(request)
+            ResponseEntity.status(HttpStatus.CREATED).body(response)
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.badRequest().body(mapOf("error" to e.message))
+        }
     }
 
     @GetMapping
@@ -29,10 +29,30 @@ class OrganizadorController(private val service: OrganizadorService) {
     }
 
     @GetMapping("/{id}")
-    fun obtenerOrganizadorPorId(@PathVariable id: Int): ResponseEntity<OrganizadorResponse> {
-        val organizador = service.obtenerOrganizadorPorId(id)
-        return if (organizador != null) ResponseEntity.ok(organizador)
-        else ResponseEntity.notFound().build()
+    fun obtenerOrganizadorPorId(@PathVariable id: Int): ResponseEntity<Any> {
+        return try {
+            val organizador = service.obtenerOrganizadorPorId(id)
+            if (organizador != null) ResponseEntity.ok(organizador)
+            else ResponseEntity.notFound().build()
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "Error al obtener organizador"))
+        }
+    }
+
+    @PutMapping("/{id}")
+    fun actualizarOrganizador(
+        @PathVariable id: Int,
+        @RequestBody request: UpdateOrganizadorRequest  // ← Cambiado aquí
+    ): ResponseEntity<Any> {
+        return try {
+            val response = service.actualizarOrganizador(id, request)
+            ResponseEntity.ok(response)
+        } catch (e: NoSuchElementException) {
+            ResponseEntity.notFound().build()
+        } catch (e: IllegalArgumentException) {
+            ResponseEntity.badRequest().body(mapOf("error" to e.message))
+        }
     }
 
     @DeleteMapping("/{id}")
