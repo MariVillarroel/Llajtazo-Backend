@@ -1,6 +1,4 @@
-package org.example.dto
-
-import kotlinx.serialization.Serializable
+package org.example.src.dto
 
 @Serializable
 data class UserRegisterRequest(

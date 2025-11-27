@@ -1,10 +1,11 @@
 package org.example.services
 
-import org.example.dto.UserRegisterRequest
-import org.example.models.Asistente
+import org.example.src.dto.UserRegisterRequest
+import org.example.src.models.Asistente
 import org.example.models.User
-import org.example.models.UserRole
-import org.example.repositories.UserRepository
+import org.example.src.models.UserRole
+import org.example.src.repositories.UserRepository
+import org.example.src.services.UserService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.assertThrows

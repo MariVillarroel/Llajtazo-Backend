@@ -1,9 +1,10 @@
-package org.example.repositories
+package org.example.src.repositories
 
 import org.example.config.DatabaseConfig
-import org.example.models.Asistente
-import org.example.models.Categoria
+import org.example.src.models.Asistente
+import org.example.src.models.Categoria
 import org.example.models.User
+import java.sql.Statement
 
 open class UserRepository {
     open fun findByEmail(email: String): User? {
@@ -79,7 +80,7 @@ open class UserRepository {
             conn.autoCommit = false
 
             try {
-                val userId = conn.prepareStatement(insertUserSql, java.sql.Statement.RETURN_GENERATED_KEYS).use { stmt ->
+                val userId = conn.prepareStatement(insertUserSql, Statement.RETURN_GENERATED_KEYS).use { stmt ->
                     stmt.setString(1, user.correo)
                     stmt.setString(2, user.username)
                     stmt.setString(3, user.passwordHash)

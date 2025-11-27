@@ -1,5 +1,8 @@
 package org.example.models
 
+import org.example.src.models.Categoria
+import org.example.src.models.UserRole
+
 data class Organizador(
     override val id: Int,
     override val username: String,

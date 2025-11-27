@@ -1,8 +1,8 @@
-package org.example.controllers
+package org.example.src.controllers
 
-import org.example.dto.UserRegisterRequest
-import org.example.dto.UserResponse
-import org.example.services.UserService
+import org.example.src.dto.UserRegisterRequest
+import org.example.src.dto.UserResponse
+import org.example.src.services.UserService
 
 class UserController(
     private val userService: UserService

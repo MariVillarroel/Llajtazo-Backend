@@ -1,5 +1,7 @@
 package org.example.models
 
+import org.example.src.models.Asistente
+
 object CreadorUser {
 
     fun crearUser(

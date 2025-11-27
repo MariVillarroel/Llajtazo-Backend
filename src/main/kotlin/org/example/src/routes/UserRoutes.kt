@@ -7,8 +7,8 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import org.example.controllers.UserController
-import org.example.dto.UserRegisterRequest
+import org.example.src.controllers.UserController
+import org.example.src.dto.UserRegisterRequest
 
 fun Route.userRoutes(userController: UserController) {
 

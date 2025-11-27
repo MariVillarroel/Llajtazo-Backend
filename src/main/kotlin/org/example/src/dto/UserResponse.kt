@@ -1,7 +1,6 @@
-package org.example.dto
+package org.example.src.dto
 
-import kotlinx.serialization.Serializable
-import org.example.models.UserRole
+import org.example.src.models.UserRole
 
 @Serializable
 data class UserResponse(

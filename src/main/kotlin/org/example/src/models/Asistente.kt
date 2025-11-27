@@ -1,4 +1,8 @@
-package org.example.models
+package org.example.src.models
+
+import org.example.src.models.Categoria
+import org.example.models.User
+import org.example.src.models.UserRole
 
 data class Asistente(
     override val id: Int,
