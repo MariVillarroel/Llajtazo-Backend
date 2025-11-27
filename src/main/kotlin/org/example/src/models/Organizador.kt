@@ -1,6 +1,7 @@
 package org.example.src.models
 
 import jakarta.persistence.*
+import kotlin.collections.map
 import kotlin.collections.toList
 
 @Entity
@@ -34,12 +35,12 @@ class Organizador(
     @OneToMany(mappedBy = "organizador", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var eventosCreados: MutableList<Evento> = mutableListOf()
 
-    // Seguidores - relación ManyToMany con usuarios
+    // Seguidores - relación ManyToMany con ASISTENTES
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "organizador_seguidores",
         joinColumns = [JoinColumn(name = "organizador_id")],
-        inverseJoinColumns = [JoinColumn(name = "usuario_id")]
+        inverseJoinColumns = [JoinColumn(name = "asistente_id")]  // Cambiado a asistente_id
     )
     var followers: MutableList<Asistente> = mutableListOf()
 
@@ -83,21 +84,32 @@ class Organizador(
         this.fechaActualizacion = java.time.LocalDateTime.now()
     }
 
-    fun agregarSeguidor(usuario: Asistente) {
-        if (!followers.contains(usuario)) {
-            followers.add(usuario)
+    // ✅ MÉTODOS CON ASISTENTE (no Usuario)
+    fun agregarSeguidor(asistente: Asistente) {
+        if (!followers.contains(asistente)) {
+            followers.add(asistente)
             actualizarFecha()
         }
     }
 
-    fun removerSeguidor(usuario: Asistente) {
-        followers.remove(usuario)
+    fun removerSeguidor(asistente: Asistente) {
+        followers.remove(asistente)
         actualizarFecha()
     }
 
     fun totalSeguidores(): Int = followers.size
 
     fun totalEventos(): Int = eventosCreados.size
+
+    // Método para verificar si un asistente específico sigue a este organizador
+    fun esSeguidor(asistente: Asistente): Boolean {
+        return followers.contains(asistente)
+    }
+
+    // Método para obtener lista de seguidores (solo IDs)
+    fun obtenerIdsSeguidores(): List<Int> {
+        return followers.map { asistente: Asistente -> asistente.id }
+    }
 
     // equals y hashCode para JPA
     override fun equals(other: Any?): Boolean {
@@ -110,6 +122,6 @@ class Organizador(
     override fun hashCode(): Int = id.hashCode()
 
     override fun toString(): String {
-        return "Organizador(id=$id, username='$username', correo='$correo', nombre_org='$nombre_org')"
+        return "Organizador(id=$id, username='$username', correo='$correo', nombre_org='$nombre_org', seguidores=${followers.size})"
     }
 }

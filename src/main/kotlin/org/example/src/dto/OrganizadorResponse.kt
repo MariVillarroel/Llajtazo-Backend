@@ -13,7 +13,8 @@ data class OrganizadorResponse(
     val totalSeguidores: Int,
     val totalEventos: Int,
     val fechaCreacion: String,
-    val fechaActualizacion: String
+    val fechaActualizacion: String,
+    val seguidoresIds: List<Int>  // Nuevo campo: IDs de los asistentes seguidores
 ) {
     companion object {
         fun fromEntity(organizador: Organizador): OrganizadorResponse {
@@ -28,7 +29,8 @@ data class OrganizadorResponse(
                 totalSeguidores = organizador.totalSeguidores(),
                 totalEventos = organizador.totalEventos(),
                 fechaCreacion = organizador.fechaCreacion.toString(),
-                fechaActualizacion = organizador.fechaActualizacion.toString()
+                fechaActualizacion = organizador.fechaActualizacion.toString(),
+                seguidoresIds = organizador.obtenerIdsSeguidores()  // Usa el nuevo método
             )
         }
     }
