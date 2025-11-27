@@ -5,6 +5,9 @@ plugins {
     id("io.spring.dependency-management") version "1.1.4"
 
 
+    kotlin("plugin.serialization") version "1.9.22"
+
+    id("io.ktor.plugin") version "2.3.5"
 }
 
 group = "org.llajtazo"
@@ -17,6 +20,15 @@ repositories {
 }
 
 dependencies {
+
+    // --- KTOR & PROJECT DEPENDENCIES ---
+    implementation("io.ktor:ktor-server-core-jvm:2.3.5")
+    implementation("io.ktor:ktor-server-netty-jvm:2.3.5")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:2.3.5")
+    implementation("io.ktor:ktor-server-content-negotiation-jvm:2.3.5")
+    implementation("mysql:mysql-connector-java:8.0.33")
+
+    // --- TEST DEPENDENCIES ---
     testImplementation(kotlin("test"))
     // Spring Boot core
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -33,7 +45,10 @@ dependencies {
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    implementation(kotlin("test"))
 }
+
 
 tasks.test {
     useJUnitPlatform()
