@@ -1,12 +1,12 @@
-package org.example.services
+package org.example.src.services
 
-import org.example.dto.UserRegisterRequest
-import org.example.dto.UserResponse
-import org.example.models.Asistente
+import org.example.src.dto.UserRegisterRequest
+import org.example.src.dto.UserResponse
+import org.example.src.models.Asistente
 import org.example.models.CreadorUser
-import org.example.repositories.UserRepository
-import org.example.utils.PasswordUtils
-import org.example.utils.ValidationUtils
+import org.example.src.repositories.UserRepository
+import org.example.src.utils.PasswordUtils
+import org.example.src.utils.ValidationUtils
 
 class UserService(
     private val userRepository: UserRepository

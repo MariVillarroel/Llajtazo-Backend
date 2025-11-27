@@ -1,16 +1,10 @@
 plugins {
     kotlin("jvm") version "2.2.0"
-<<<<<<< HEAD
     kotlin("plugin.spring") version "2.2.0"
     id("org.springframework.boot") version "3.2.0"
     id("io.spring.dependency-management") version "1.1.4"
-
-
-=======
     kotlin("plugin.serialization") version "1.9.22"
-
     id("io.ktor.plugin") version "2.3.5"
->>>>>>> origin/feature/registro-usuario
 }
 
 group = "org.llajtazo"

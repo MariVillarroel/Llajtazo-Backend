@@ -1,4 +1,4 @@
-package org.example.utils
+package org.example.src.utils
 
 object ValidationUtils {
     fun isValidEmail(email: String): Boolean =
