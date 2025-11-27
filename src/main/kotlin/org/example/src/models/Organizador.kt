@@ -7,8 +7,6 @@ import kotlin.collections.toList
 @Entity
 @Table(name = "organizadores")
 class Organizador(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     final override var id: Int = 0,
 
     @Column(nullable = false, unique = true)
@@ -47,7 +45,7 @@ class Organizador(
     @Column(name = "fecha_actualizacion")
     var fechaActualizacion: java.time.LocalDateTime = java.time.LocalDateTime.now()
 
-    override fun get_Role(): String = "organizador"
+    override fun get_Role(): UserRole = UserRole.ORGANIZADOR
 
     fun crearEvento(evento: Evento) {
         eventosCreados.add(evento)
@@ -61,7 +59,6 @@ class Organizador(
 
     fun listarEventos(): List<Evento> = eventosCreados.toList()
 
-    // ✅ CORRECCIÓN: Método que actualiza la instancia actual
     fun actualizarPerfil(
         nuevoUsername: String? = null,
         nuevoCorreo: String? = null,
@@ -84,7 +81,6 @@ class Organizador(
         this.fechaActualizacion = java.time.LocalDateTime.now()
     }
 
-    // ✅ MÉTODOS CON ASISTENTE (no Usuario)
     fun agregarSeguidor(asistente: Asistente) {
         if (!followers.contains(asistente)) {
             followers.add(asistente)

@@ -26,7 +26,7 @@ abstract class User {
     @Column(name = "activo", nullable = false)
     open var activo: Boolean = true
 
-    abstract fun get_Role(): String
+    abstract fun get_Role(): UserRole
 
     // Métodos comunes para todos los usuarios
     open fun getNombreCompleto(): String {
