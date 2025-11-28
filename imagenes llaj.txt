@@ -1,0 +1,27 @@
+USE llajtazo;
+
+INSERT INTO events (
+  organizador_id,
+  lugar_id,
+  categoria_id,
+  titulo,
+  descripcion,
+  start_time,
+  end_time,
+  cover_url,
+  estado
+) VALUES (
+  NULL,              -- de momento sin organizador
+  NULL,              -- sin lugar
+  NULL,              -- sin categoría
+  'Evento de prueba',
+  'Este es un evento solo para probar la imagen.',
+  '2025-01-01 20:00:00',
+  '2025-01-01 23:00:00',
+  'https://www.fundacionkonex.org/custom/web/data/imagenes/repositorio/2025/06/02/19739/2025060203055128b0fdeb1e819cc0601f72b5ee097c8b.jpg',
+  'PUBLISHED'
+);
+SELECT id, titulo, cover_url
+FROM events
+ORDER BY id DESC
+LIMIT 5;
