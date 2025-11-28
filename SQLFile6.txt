@@ -1,0 +1,14 @@
+USE llajtazo;
+
+SELECT 
+  e.id,
+  e.titulo,
+  o.nombre AS organizador,
+  l.nombre AS lugar,
+  c.nombre AS categoria,
+  e.start_time,
+  e.end_timeid
+FROM events e
+LEFT JOIN organizadores o ON e.organizador_id = o.id
+LEFT JOIN lugares l       ON e.lugar_id = l.id
+LEFT JOIN categorias c    ON e.categoria_id = c.id;

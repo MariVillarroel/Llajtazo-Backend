@@ -1,0 +1,276 @@
+USE llajtazo;
+
+-- ==========================================
+-- (OPCIONAL) Limpiar datos previos de prueba
+-- ==========================================
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE compartidos;
+TRUNCATE TABLE estadisticas_evento_diarias;
+TRUNCATE TABLE favoritos;
+TRUNCATE TABLE imagenes_evento;
+TRUNCATE TABLE intereses_usuario;
+TRUNCATE TABLE invitaciones;
+TRUNCATE TABLE items_orden;
+TRUNCATE TABLE notificaciones;
+TRUNCATE TABLE ordenes;
+TRUNCATE TABLE pagos;
+TRUNCATE TABLE seguidores;
+TRUNCATE TABLE tipos_ticket;
+TRUNCATE TABLE events;
+TRUNCATE TABLE categorias;
+TRUNCATE TABLE usuarios;
+TRUNCATE TABLE organizadores;
+TRUNCATE TABLE lugares;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ==========================================
+-- 1) Catálogo básico (categoría)
+-- ==========================================
+INSERT INTO categorias (nombre)
+VALUES ('Concierto');   -- id = 1
+
+-- ==========================================
+-- 2) Usuario de prueba (tú)
+-- ==========================================
+INSERT INTO usuarios (
+  email,
+  nombre_completo,
+  password_hash,
+  avatar_url
+) VALUES (
+  'luis@llajtazo.com',
+  'Luis Saavedra',
+  'hash_falso_123',  -- solo para prueba
+  'https://ui-avatars.com/api/?name=Luis+Saavedra'
+);
+
+-- id de este usuario será 1 si la tabla estaba vacía
+
+-- ==========================================
+-- 3) Organizador de prueba
+-- ==========================================
+INSERT INTO organizadores (
+  nombre,
+  about,
+  logo_url,
+  followers
+) VALUES (
+  'Llajtazo',
+  'Plataforma digital para eventos culturales en Bolivia.',
+  'https://ui-avatars.com/api/?name=Llajtazo',
+  0
+);
+-- id = 1
+
+-- ==========================================
+-- 4) Lugar de prueba
+-- ==========================================
+INSERT INTO lugares (
+  nombre,
+  direccion,
+  latitud,
+  longitud
+) VALUES (
+  'Euphoria',
+  'Av. de ejemplo 123, Cochabamba, Bolivia',
+  -17.389500,
+  -66.157000
+);
+-- id = 1
+
+-- ==========================================
+-- 5) Evento principal de prueba
+-- ==========================================
+INSERT INTO events (
+  organizador_id,
+  lugar_id,
+  categoria_id,
+  titulo,
+  descripcion,
+  start_time,
+  end_time,
+  cover_url,
+  estado
+) VALUES (
+  1,  -- organizador Llajtazo
+  1,  -- lugar Euphoria
+  1,  -- categoría Concierto
+  'Concierto de prueba',
+  'Concierto de prueba organizado por Llajtazo en Euphoria. Evento de ejemplo para probar la base de datos, tickets, pagos e interacciones.',
+  '2025-01-01 20:00:00',
+  '2025-01-01 23:00:00',
+  'https://www.fundacionkonex.org/custom/web/data/imagenes/repositorio/2025/06/02/19739/2025060203055128b0fdeb1e819cc0601f72b5ee097c8b.jpg',
+  'PUBLISHED'
+);
+-- id del evento = 1
+
+-- ==========================================
+-- 6) Imagen extra del evento (galería)
+-- ==========================================
+INSERT INTO imagenes_evento (event_id, url, orden)
+VALUES
+  (1, 'https://www.fundacionkonex.org/custom/web/data/imagenes/repositorio/2025/06/02/19739/2025060203055128b0fdeb1e819cc0601f72b5ee097c8b.jpg', 1);
+
+-- ==========================================
+-- 7) Tipos de ticket del evento
+-- ==========================================
+INSERT INTO tipos_ticket (
+  evento_id,
+  nombre,
+  precio,
+  moneda,
+  cantidad_total,
+  cantidad_vendida
+) VALUES
+  (1, 'Entrada General', 80, 'BOB', 100, 10),
+  (1, 'VIP', 150, 'BOB', 50, 5);
+
+-- Suponiendo que:
+--   Entrada General = id 1
+--   VIP             = id 2
+
+-- ==========================================
+-- 8) Orden de compra de ejemplo
+-- ==========================================
+INSERT INTO ordenes (
+  usuario_id,
+  organizador_id,
+  estado,
+  subtotal,
+  fees,
+  total
+) VALUES (
+  1,          -- usuario Luis
+  1,          -- organizador Llajtazo
+  'PAID',     -- orden pagada
+  160,        -- 2 entradas generales (2 x 80)
+  10,         -- fees
+  170         -- total = subtotal + fees
+);
+-- id de la orden = 1
+
+-- ==========================================
+-- 9) Ítems de la orden (tickets)
+-- ==========================================
+INSERT INTO items_orden (
+  orden_id,
+  tipo_ticket_id,
+  precio_unitario,
+  cantidad,
+  codigo_ticket
+) VALUES
+  (1, 1, 80, 2, 'LLA-TEST-0001');
+
+-- ==========================================
+-- 🔟 Pago asociado a la orden
+-- ==========================================
+INSERT INTO pagos (
+  orden_id,
+  proveedor,
+  referencia_proveedor,
+  monto,
+  estado,
+  pagado_en
+) VALUES (
+  1,                 -- orden 1
+  'Tarjeta',
+  'REF-TEST-123456',
+  170,
+  'CONFIRMADO',
+  '2024-12-01 15:30:00'
+);
+
+-- ==========================================
+-- 11) Favoritos: Luis marca el evento como favorito
+-- ==========================================
+INSERT INTO favoritos (
+  usuario_id,
+  evento_id
+) VALUES (
+  1,  -- Luis
+  1   -- Concierto de prueba
+);
+
+-- ==========================================
+-- 12) Seguidores: Luis sigue a Llajtazo
+-- ==========================================
+INSERT INTO seguidores (
+  usuario_id,
+  organizador_id
+) VALUES (
+  1,  -- Luis
+  1   -- Llajtazo
+);
+
+-- ==========================================
+-- 13) Compartidos: Luis comparte el evento
+-- ==========================================
+INSERT INTO compartidos (
+  usuario_id,
+  evento_id,
+  canal
+) VALUES (
+  1,
+  1,
+  'Instagram'
+);
+
+-- ==========================================
+-- 14) Estadísticas diarias del evento
+-- ==========================================
+INSERT INTO estadisticas_evento_diarias (
+  evento_id,
+  dia,
+  visitas,
+  tickets_vendidos
+) VALUES
+  (1, '2025-01-01', 120, 30),
+  (1, '2025-01-02', 80, 15);
+
+-- ==========================================
+-- 15) Intereses del usuario
+-- ==========================================
+INSERT INTO intereses_usuario (
+  usuario_id,
+  tag
+) VALUES
+  (1, 'Conciertos'),
+  (1, 'Música en vivo');
+
+-- ==========================================
+-- 16) Invitación a un amigo
+-- ==========================================
+INSERT INTO invitaciones (
+  invitador_id,
+  email_invitado,
+  evento_id,
+  usuario_aceptado_id
+) VALUES (
+  1,                    -- Luis invita
+  'amigo@ejemplo.com',
+  1,                    -- evento concierto de prueba
+  NULL                  -- aún no se registró
+);
+
+-- ==========================================
+-- 17) Notificación para el usuario
+-- ==========================================
+INSERT INTO notificaciones (
+  usuario_id,
+  tipo,
+  titulo,
+  cuerpo,
+  data
+) VALUES (
+  1,
+  'COMPRA_CONFIRMADA',
+  'Tu entrada para "Concierto de prueba" está confirmada',
+  'Has comprado 2 entradas generales para el Concierto de prueba en Euphoria.',
+  JSON_OBJECT(
+    'evento_id', 1,
+    'orden_id', 1,
+    'cantidad_tickets', 2
+  )
+);

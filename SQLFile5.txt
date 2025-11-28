@@ -1,0 +1,106 @@
+USE llajtazo;
+
+-- ================================
+-- 1) Actualizar el evento 1 a Duki
+-- ================================
+UPDATE events
+SET titulo = 'Duki en Euphoria',
+    descripcion = 'Concierto de Duki en Euphoria, parte de su gira 2025. Evento de trap con invitados especiales.',
+    start_time = '2025-03-15 21:00:00',
+    end_time = '2025-03-16 00:30:00'
+WHERE id = 1;
+
+-- ================================
+-- 2) Más categorías reales
+-- ================================
+INSERT INTO categorias (nombre)
+VALUES ('Festival'), ('Teatro'), ('Taller');
+-- Ahora tienes:
+-- 1: Concierto, 2: Festival, 3: Teatro, 4: Taller
+
+-- ================================
+-- 3) Más usuarios
+-- ================================
+INSERT INTO usuarios (email, nombre_completo, password_hash, avatar_url) VALUES
+('majo@llajtazo.com',   'María José V.', 'hash_fake_1', 'https://ui-avatars.com/api/?name=Maria+Jose+V'),
+('isa@llajtazo.com',    'Isabel Rojas',  'hash_fake_2', 'https://ui-avatars.com/api/?name=Isabel+Rojas'),
+('fabricio@llajtazo.com','Fabricio Flores','hash_fake_3','https://ui-avatars.com/api/?name=Fabricio+Flores');
+
+-- ================================
+-- 4) Más organizadores
+-- ================================
+INSERT INTO organizadores (nombre, about, logo_url, followers) VALUES
+('Euphoria Producciones', 'Productora que maneja shows internacionales en Cochabamba.', 'https://ui-avatars.com/api/?name=Euphoria+Prod', 1200),
+('IndieBol', 'Colectivo de bandas indie y alternativo de Bolivia.', 'https://ui-avatars.com/api/?name=IndieBol', 600);
+
+-- ================================
+-- 5) Más lugares
+-- ================================
+INSERT INTO lugares (nombre, direccion, latitud, longitud) VALUES
+('Teatro Achá', 'Centro de la ciudad, Cochabamba', -17.392000, -66.157500),
+('mARTadero', 'Calle 27 de Agosto, Cochabamba', -17.392800, -66.151900);
+-- Recuerda que ya tenías:
+-- id 1: Euphoria
+
+-- ================================
+-- 6) Más eventos
+-- ================================
+INSERT INTO events (
+  organizador_id, lugar_id, categoria_id,
+  titulo, descripcion, start_time, end_time, cover_url, estado
+) VALUES
+  (2, 2, 2,
+   'Festival Indie Llajtazo',
+   'Festival con bandas indie locales y ferias de arte y comida.',
+   '2025-04-10 16:00:00', '2025-04-10 23:59:00',
+   'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg',
+   'PUBLISHED'),
+  (3, 3, 3,
+   'Stand Up Night',
+   'Noche de comedia con varios comediantes emergentes.',
+   '2025-02-20 20:30:00', '2025-02-20 23:00:00',
+   'https://images.pexels.com/photos/713149/pexels-photo-713149.jpeg',
+   'PUBLISHED');
+
+-- Suponiendo:
+-- evento 1: Duki en Euphoria
+-- evento 2: Festival Indie Llajtazo
+-- evento 3: Stand Up Night
+
+-- ================================
+-- 7) Tickets para los nuevos eventos
+-- ================================
+INSERT INTO tipos_ticket (evento_id, nombre, precio, moneda, cantidad_total, cantidad_vendida) VALUES
+  (2, 'Entrada General', 60, 'BOB', 300, 120),
+  (2, 'Full Pass 2 días', 100, 'BOB', 200, 80),
+  (3, 'Entrada General', 50, 'BOB', 150, 40);
+
+-- ================================
+-- 8) Orden y pago para el Festival (evento 2)
+--    Compradora: Majo (usuario id 2)
+-- ================================
+INSERT INTO ordenes (usuario_id, organizador_id, estado, subtotal, fees, total)
+VALUES (2, 2, 'PAID', 200, 15, 215);
+
+-- asumimos que esta orden es id = 2
+INSERT INTO items_orden (orden_id, tipo_ticket_id, precio_unitario, cantidad, codigo_ticket)
+VALUES (2, 3, 100, 2, 'FEST-2025-0001');  -- Full Pass 2 días (id 3)
+
+INSERT INTO pagos (orden_id, proveedor, referencia_proveedor, monto, estado, pagado_en) VALUES
+(2, 'QR Bancario', 'QR-LLAJTAZO-0001', 215, 'CONFIRMADO', '2025-03-01 12:00:00');
+
+-- ================================
+-- 9) Favoritos y seguidores de los otros usuarios
+-- ================================
+-- Majo y Isa marcan Duki en Euphoria como favorito,
+-- Fabricio marca el Festival Indie Llajtazo.
+INSERT INTO favoritos (usuario_id, evento_id) VALUES
+(2, 1),
+(3, 1),
+(4, 2);
+
+-- Todos siguen a Llajtazo (organizador id 1)
+INSERT INTO seguidores (usuario_id, organizador_id) VALUES
+(2, 1),
+(3, 1),
+(4, 1);

@@ -1,0 +1,16 @@
+SELECT 'categorias', COUNT(*) FROM categorias;
+SELECT 'usuarios', COUNT(*) FROM usuarios;
+SELECT 'organizadores', COUNT(*) FROM organizadores;
+SELECT 'lugares', COUNT(*) FROM lugares;
+SELECT 'events', COUNT(*) FROM events;
+SELECT 'tipos_ticket', COUNT(*) FROM tipos_ticket;
+SELECT 'ordenes', COUNT(*) FROM ordenes;
+SELECT 'items_orden', COUNT(*) FROM items_orden;
+SELECT 'pagos', COUNT(*) FROM pagos;
+SELECT 'favoritos', COUNT(*) FROM favoritos;
+SELECT 'seguidores', COUNT(*) FROM seguidores;
+SELECT 'compartidos', COUNT(*) FROM compartidos;
+SELECT 'estadisticas_evento_diarias', COUNT(*) FROM estadisticas_evento_diarias;
+SELECT 'intereses_usuario', COUNT(*) FROM intereses_usuario;
+SELECT 'invitaciones', COUNT(*) FROM invitaciones;
+SELECT 'notificaciones', COUNT(*) FROM notificaciones;
