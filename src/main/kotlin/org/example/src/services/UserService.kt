@@ -3,8 +3,8 @@ package org.example.src.services
 import org.example.src.dto.UserRegisterRequest
 import org.example.src.dto.UserResponse
 import org.example.src.models.Asistente
-import org.example.models.CreadorUser
-import org.example.src.repositories.UserRepository
+import org.example.src.models.CreadorUser
+import org.example.src.repositories.UserRepositorry
 import org.example.src.utils.PasswordUtils
 import org.example.src.utils.ValidationUtils
 
