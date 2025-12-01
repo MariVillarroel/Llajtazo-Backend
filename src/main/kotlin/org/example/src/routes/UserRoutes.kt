@@ -8,14 +8,14 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import org.example.src.controllers.UserController
-import org.example.src.dto.UserRegisterRequest
+import org.example.src.dto.UserRequest
 
 fun Route.userRoutes(userController: UserController) {
 
     route("/users") {
 
         post("/register") {
-            val request = call.receive<UserRegisterRequest>()
+            val request = call.receive<UserRequest>()
 
             try {
                 val response = userController.register(request)

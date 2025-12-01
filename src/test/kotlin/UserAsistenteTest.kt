@@ -1,6 +1,6 @@
 package org.example.services
 
-import org.example.src.dto.UserRegisterRequest
+import org.example.src.dto.UserRequest
 import org.example.src.models.Asistente
 import org.example.models.User
 import org.example.src.models.UserRole
@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class FakeUserRepository : UserRepository() {
 
@@ -37,7 +35,7 @@ class UserAsistenteTest {
     // TEST 1: Registro exitoso
     @Test
     fun `registro exitoso devuelve UserResponse correcto`() {
-        val req = UserRegisterRequest(
+        val req = UserRequest(
             id = 0,
             tipo = "asistente",
             username = "daniela",
@@ -56,7 +54,7 @@ class UserAsistenteTest {
     // TEST 2: No permite correos duplicados
     @Test
     fun `no permite registrar dos usuarios con el mismo correo`() {
-        val req1 = UserRegisterRequest(
+        val req1 = UserRequest(
             id = 0,
             tipo = "asistente",
             username = "user1",
@@ -64,7 +62,7 @@ class UserAsistenteTest {
             password = "PasswordSegura123"
         )
 
-        val req2 = UserRegisterRequest(
+        val req2 = UserRequest(
             id = 0,
             tipo = "asistente",
             username = "user2",
