@@ -1,10 +1,7 @@
 plugins {
-    kotlin("jvm") version "2.2.0"
-    kotlin("plugin.spring") version "2.2.0"
-    id("org.springframework.boot") version "3.2.0"
-    id("io.spring.dependency-management") version "1.1.4"
-    kotlin("plugin.serialization") version "1.9.22"
-    id("io.ktor.plugin") version "2.3.5"
+        kotlin("jvm") version "1.9.10"
+        id("org.springframework.boot") version "3.1.5"
+        id("io.spring.dependency-management") version "1.1.3"
 }
 
 group = "org.llajtazo"
@@ -19,6 +16,7 @@ repositories {
 dependencies {
 
     // --- KTOR & PROJECT DEPENDENCIES ---
+    implementation("org.springframework.security:spring-security-crypto")
     implementation("io.ktor:ktor-server-core-jvm:2.3.5")
     implementation("io.ktor:ktor-server-netty-jvm:2.3.5")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:2.3.5")

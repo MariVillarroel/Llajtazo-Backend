@@ -5,7 +5,7 @@ import jakarta.persistence.*
 @Entity
 @Table(name = "usuarios")
 class Asistente(
-    final override val id: Int,
+    final override var id: Int = 0,
     @Column(nullable = false, unique = true)
     override val username: String,
 
