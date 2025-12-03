@@ -17,13 +17,9 @@ data class OrganizadorRequest(
     @field:Size(min = 6, message = "Password debe tener al menos 6 caracteres")
     val password: String,
 
-    val profilePic: String = "",
+    val profilePic: String? = "",
 
-    @field:NotBlank(message = "Nombre de organización es requerido")
-    @field:Size(max = 100, message = "Nombre de organización no puede exceder 100 caracteres")
-    val nombreOrg: String,
+    val about: String? = null,
 
-    @field:NotBlank(message = "Número es requerido")
-    @field:Size(min = 8, max = 15, message = "Número debe tener entre 8 y 15 caracteres")
-    val numero: String
+    val suscribed: Boolean = false
 )

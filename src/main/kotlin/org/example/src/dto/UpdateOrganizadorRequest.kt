@@ -5,6 +5,7 @@ data class UpdateOrganizadorRequest(
     val correo: String? = null,
     val password: String? = null,
     val profilePic: String? = null,
-    val nombreOrg: String? = null,
-    val numero: String? = null
+    val about: String? = null,
+    val suscribed: Boolean? = null
 )
+

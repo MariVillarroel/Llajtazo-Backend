@@ -1,33 +1,31 @@
 package org.example.src.models
 
 import jakarta.persistence.*
-import kotlin.collections.map
-import kotlin.collections.toList
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "organizadores")
 class Organizador(
-    final override var id: Int = 0,
+    override var username: String,
+    override var correo: String,
+    override var password: String,
+    override var profile_pic: String? = null,
 
-    @Column(nullable = false, unique = true)
-    final override var username: String,
+    @Column(name = "about", columnDefinition = "TEXT")
+    var about: String? = null,
 
-    @Column(nullable = false, unique = true)
-    final override var correo: String,
+    @Column(name = "suscribed")
+    var suscribed: Boolean = false,
 
-    @Column(nullable = false)
-    final override var password: String,
+    @Column(name = "created_at", updatable = false)
+    override var fechaCreacion: LocalDateTime = LocalDateTime.now()
 
-    @Column(name = "profile_pic")
-    final override var profile_pic: String = "",
 
-    @Column(name = "nombre_org", nullable = false)
-    var nombre_org: String,
-
-    @Column(nullable = false)
-    var numero: String
 
 ) : User() {
+
+    // Rol
+    override fun get_Role(): UserRole = UserRole.ORGANIZADOR
 
     // Relación con eventos - LAZY para evitar problemas de carga
     @OneToMany(mappedBy = "organizador", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
@@ -36,25 +34,19 @@ class Organizador(
     // Seguidores - relación ManyToMany con ASISTENTES
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "organizador_seguidores",
+        name = "seguidores",
         joinColumns = [JoinColumn(name = "organizador_id")],
-        inverseJoinColumns = [JoinColumn(name = "asistente_id")]  // Cambiado a asistente_id
+        inverseJoinColumns = [JoinColumn(name = "usuario_id")]
     )
     var followers: MutableList<Asistente> = mutableListOf()
 
-    @Column(name = "fecha_actualizacion")
-    var fechaActualizacion: java.time.LocalDateTime = java.time.LocalDateTime.now()
-
-    override fun get_Role(): UserRole = UserRole.ORGANIZADOR
 
     fun crearEvento(evento: Evento) {
         eventosCreados.add(evento)
-        actualizarFecha()
     }
 
     fun deleteEvento(evento: Evento) {
         eventosCreados.remove(evento)
-        actualizarFecha()
     }
 
     fun listarEventos(): List<Evento> = eventosCreados.toList()
@@ -64,47 +56,35 @@ class Organizador(
         nuevoCorreo: String? = null,
         nuevoPassword: String? = null,
         nuevaProfilePic: String? = null,
-        nuevoNombreOrg: String? = null,
-        nuevoNumero: String? = null
+        nuevoAbout: String? = null,
     ) {
         nuevoUsername?.let { this.username = it }
         nuevoCorreo?.let { this.correo = it }
         nuevoPassword?.let { this.password = it }
         nuevaProfilePic?.let { this.profile_pic = it }
-        nuevoNombreOrg?.let { this.nombre_org = it }
-        nuevoNumero?.let { this.numero = it }
-
-        actualizarFecha()
-    }
-
-    private fun actualizarFecha() {
-        this.fechaActualizacion = java.time.LocalDateTime.now()
+        nuevoAbout?.let { this.about = it }
     }
 
     fun agregarSeguidor(asistente: Asistente) {
         if (!followers.contains(asistente)) {
             followers.add(asistente)
-            actualizarFecha()
         }
     }
 
     fun removerSeguidor(asistente: Asistente) {
         followers.remove(asistente)
-        actualizarFecha()
     }
 
     fun totalSeguidores(): Int = followers.size
 
     fun totalEventos(): Int = eventosCreados.size
 
-    // Método para verificar si un asistente específico sigue a este organizador
     fun esSeguidor(asistente: Asistente): Boolean {
         return followers.contains(asistente)
     }
 
-    // Método para obtener lista de seguidores (solo IDs)
     fun obtenerIdsSeguidores(): List<Int> {
-        return followers.map { asistente: Asistente -> asistente.id }
+        return followers.map { asistente -> asistente.id }
     }
 
     // equals y hashCode para JPA
@@ -118,6 +98,6 @@ class Organizador(
     override fun hashCode(): Int = id.hashCode()
 
     override fun toString(): String {
-        return "Organizador(id=$id, username='$username', correo='$correo', nombre_org='$nombre_org', seguidores=${followers.size})"
+        return "Organizador(id=$id, username='$username', correo='$correo', seguidores=${followers.size})"
     }
 }

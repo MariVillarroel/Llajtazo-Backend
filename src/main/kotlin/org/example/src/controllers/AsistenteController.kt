@@ -13,7 +13,6 @@ class AsistenteController(
     private val asistenteService: AsistenteService
 ) {
 
-    // 🆕 ENDPOINT DE LOGIN
     @PostMapping("/login")
     fun login(@RequestBody request: LoginRequest): ResponseEntity<Any> {
         return try {
@@ -29,31 +28,30 @@ class AsistenteController(
         }
     }
 
-    // ✅ CREAR ASISTENTE (con validaciones mejoradas)
     @PostMapping
     fun crearAsistente(@RequestBody request: UserRequest): ResponseEntity<Any> {
         return try {
             val response = asistenteService.crearAsistente(request)
             ResponseEntity.status(HttpStatus.CREATED).body(response)
         } catch (e: IllegalArgumentException) {
-            ResponseEntity.badRequest().body(mapOf(
-                "error" to e.message,
-                "type" to "VALIDATION_ERROR"
-            ))
+            ResponseEntity.badRequest().body(
+                mapOf(
+                    "error" to e.message,
+                    "type" to "VALIDATION_ERROR"
+                )
+            )
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(mapOf("error" to "Error interno del servidor"))
         }
     }
 
-    // 📋 LISTAR ASISTENTES
     @GetMapping
     fun listarAsistentes(): ResponseEntity<List<UserResponse>> {
         val lista = asistenteService.listarAsistentes()
         return ResponseEntity.ok(lista)
     }
 
-    // 👤 OBTENER POR ID
     @GetMapping("/{id}")
     fun obtenerAsistente(@PathVariable id: Int): ResponseEntity<Any> {
         return try {
@@ -70,30 +68,15 @@ class AsistenteController(
         }
     }
 
-    // ✏️ ACTUALIZAR ASISTENTE
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     fun actualizarAsistente(
         @PathVariable id: Int,
         @RequestBody request: UpdateAsistenteRequest
-    ): ResponseEntity<Any> {
-        return try {
-            val response = asistenteService.actualizarAsistente(id, request)
-            ResponseEntity.ok(response)
-        } catch (e: NoSuchElementException) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("error" to "Asistente no encontrado"))
-        } catch (e: IllegalArgumentException) {
-            ResponseEntity.badRequest().body(mapOf(
-                "error" to e.message,
-                "type" to "VALIDATION_ERROR"
-            ))
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("error" to "Error interno del servidor"))
-        }
+    ): ResponseEntity<UserResponse> {
+        val actualizado = asistenteService.actualizarAsistente(id, request)
+        return ResponseEntity.ok(actualizado) // ✅ ya es UserResponse
     }
 
-    // 🗑️ ELIMINAR ASISTENTE
     @DeleteMapping("/{id}")
     fun eliminarAsistente(@PathVariable id: Int): ResponseEntity<Any> {
         return if (asistenteService.eliminarAsistente(id)) {
@@ -104,7 +87,6 @@ class AsistenteController(
         }
     }
 
-    // 🔍 BUSCAR POR CORREO
     @GetMapping("/buscar")
     fun buscarPorCorreo(@RequestParam correo: String): ResponseEntity<Any> {
         return try {
@@ -121,7 +103,6 @@ class AsistenteController(
         }
     }
 
-    // 👤 BUSCAR POR USERNAME
     @GetMapping("/username/{username}")
     fun buscarPorUsername(@PathVariable username: String): ResponseEntity<Any> {
         return try {
@@ -138,7 +119,6 @@ class AsistenteController(
         }
     }
 
-    // ✅ VERIFICAR CREDENCIALES
     @PostMapping("/verificar")
     fun verificarCredenciales(@RequestBody request: LoginRequest): ResponseEntity<Any> {
         return try {

@@ -7,7 +7,7 @@ data class UserResponse(
     val id: Int,
     val username: String,
     val correo: String,
-    val profilePic:String,
+    val profilePic:String?,
     val role: UserRole,
     val totalOrganizadoresSeguidos: Int,
     val fechaCreacion: String

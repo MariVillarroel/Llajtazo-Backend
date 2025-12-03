@@ -6,35 +6,39 @@ import jakarta.persistence.*
 abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    open val id: Int = 0
+    open var id: Int = 0
 
-    @get:Column(name = "username", nullable = false, unique = true, length = 50)
-    abstract val username: String
+    @get:Column(name = "nombre_completo", nullable = false, unique = true, length = 255)
+    abstract var username: String
 
-    @get:Column(name = "correo", nullable = false, unique = true, length = 100)
-    abstract val correo: String
+    @get:Column(name = "email", nullable = false, unique = true, length = 255)
+    abstract var correo: String
 
-    @get:Column(name = "password", nullable = false, length = 255)
-    abstract val password: String
+    @get:Column(name = "password_hash", nullable = false, length = 50)
+    abstract var password: String
 
-    @get:Column(name = "profile_pic", length = 500)
-    abstract val profile_pic: String
+    @get:Column(name = "avatar_url", columnDefinition = "TEXT", nullable = true)
+    abstract var profile_pic: String?
 
-    @Column(name = "fecha_creacion", nullable = false)
-    open val fechaCreacion: java.time.LocalDateTime = java.time.LocalDateTime.now()
+    @Column(name = "created_at", nullable = false)
+    open var fechaCreacion: java.time.LocalDateTime = java.time.LocalDateTime.now()
 
-    @Column(name = "activo", nullable = false)
+    @Transient
     open var activo: Boolean = true
+
+    @ManyToMany
+    @JoinTable(
+        name = "tags",
+        joinColumns = [JoinColumn(name = "usuario_id")],
+        inverseJoinColumns = [JoinColumn(name = "categorias_id")]
+    )
+    val tags: MutableList<Categoria> = mutableListOf()
 
     abstract fun get_Role(): UserRole
 
-    // Métodos comunes para todos los usuarios
+
     open fun getNombreCompleto(): String {
-        return if (this is Organizador) {
-            this.nombre_org
-        } else {
-            this.username
-        }
+        return this.username
     }
 
     open fun estaActivo(): Boolean = activo

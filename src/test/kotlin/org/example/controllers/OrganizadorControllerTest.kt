@@ -1,109 +1,112 @@
 package org.example.controllers
-import org.example.LlajtazoBackendApplication
-import org.example.src.models.Organizador
-import org.example.src.repositories.OrganizadorRepository
-import org.junit.jupiter.api.Assertions
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.example.src.controllers.OrganizadorController
+import org.example.src.dto.LoginRequest
+import org.example.src.dto.OrganizadorRequest
+import org.example.src.dto.OrganizadorResponse
+import org.example.src.services.OrganizadorService
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 
-@SpringBootTest(classes = [LlajtazoBackendApplication::class])
-@AutoConfigureMockMvc
-class OrganizadorControllerTest {
+@WebMvcTest(controllers = [OrganizadorController::class])
+class OrganizadorControllerExtraTest @Autowired constructor(
+    private val mockMvc: MockMvc,
+    private val objectMapper: ObjectMapper
+) {
 
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-
-    @Autowired
-    private lateinit var repository: OrganizadorRepository
+    @MockBean
+    private lateinit var organizadorService: OrganizadorService
 
     @Test
-    fun `crear organizador`() {
-        val json = """
-            {
-              "username": "mariana",
-              "correo": "mariana@eventos.com",
-              "password": "1234",
-              "profilePic": "pic.png",
-              "nombreOrg": "Eventos Mariana",
-              "numero": "7654321"
-            }
-        """.trimIndent()
+    fun `login exitoso devuelve 200`() {
+        val request = LoginRequest(correo = "org1@example.com", password = "Passw0rd!")
+        val response = OrganizadorResponse(
+            id = 1,
+            username = "org1",
+            correo = "org1@example.com",
+            profilePic = null,
+            role = "ORGANIZER",
+            totalSeguidores = 0,
+            totalEventos = 0,
+            seguidoresIds = emptyList()
+        )
+
+        whenever(organizadorService.login(any(), any())).thenReturn(response)
 
         mockMvc.perform(
-            MockMvcRequestBuilders.post("/organizadores")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(json))
-            .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.username").value("mariana"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.role").value("organizador"))
+            post("/organizadores/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.username").value("org1"))
     }
 
     @Test
-    fun `eliminar organizador`() {
-        // Arrange: crear organizador en BD
-        val organizador = Organizador(
-            username = "juan",
-            correo = "juan@eventos.com",
-            password = "1234",
-            profile_pic = "pic.png",
-            nombre_org = "Eventos Juan",
-            numero = "123456"
-        )
-        val saved = repository.save(organizador)
+    fun `login fallido devuelve 401`() {
+        val request = LoginRequest(correo = "org1@example.com", password = "wrongpass")
 
-        // Act: eliminar
+        whenever(organizadorService.login(any(), any())).thenReturn(null)
+
         mockMvc.perform(
-            MockMvcRequestBuilders.delete("/organizadores/${saved.id}")
-            .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(MockMvcResultMatchers.status().isNoContent)
-
-        // Assert: verificar que ya no existe
-        Assertions.assertFalse(repository.existsById(saved.id))
+            post("/organizadores/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+            .andExpect(status().isUnauthorized)
     }
 
     @Test
-    fun `actualizar organizador`() {
-        // Arrange: crear organizador en BD
-        val organizador = Organizador(
-            username = "ana",
-            correo = "ana@eventos.com",
-            password = "1234",
-            profile_pic = "pic.png",
-            nombre_org = "Eventos Ana",
-            numero = "111111"
+    fun `buscar por correo devuelve 200 si existe`() {
+        val response = OrganizadorResponse(
+            id = 2,
+            username = "org2",
+            correo = "org2@example.com",
+            profilePic = null,
+            role = "ORGANIZER",
+            totalSeguidores = 0,
+            totalEventos = 0,
+            seguidoresIds = emptyList()
         )
-        val saved = repository.save(organizador)
 
-        val jsonUpdate = """
-            {
-              "username": "ana_actualizada",
-              "correo": "ana@eventos.com",
-              "password": "1234",
-              "profilePic": "pic.png",
-              "nombreOrg": "Eventos Ana Updated",
-              "numero": "222222"
-            }
-        """.trimIndent()
+        whenever(organizadorService.buscarPorCorreo("org2@example.com")).thenReturn(response)
 
-        // Act: actualizar
-        mockMvc.perform(
-            MockMvcRequestBuilders.put("/organizadores/${saved.id}")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonUpdate))
-            .andExpect(MockMvcResultMatchers.status().isOk)
-            .andExpect(MockMvcResultMatchers.jsonPath("$.username").value("ana_actualizada"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.nombreOrg").value("Eventos Ana Updated"))
+        mockMvc.perform(get("/organizadores/buscar").param("correo", "org2@example.com"))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.id").value(2))
+            .andExpect(jsonPath("$.correo").value("org2@example.com"))
+    }
 
-        // Assert: verificar en BD
-        val updated = repository.findById(saved.id).get()
-        Assertions.assertEquals("ana_actualizada", updated.username)
-        Assertions.assertEquals("Eventos Ana Updated", updated.nombre_org)
+    @Test
+    fun `buscar por correo devuelve 404 si no existe`() {
+        whenever(organizadorService.buscarPorCorreo("noexist@example.com")).thenReturn(null)
+
+        mockMvc.perform(get("/organizadores/buscar").param("correo", "noexist@example.com"))
+            .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `eliminar organizador devuelve 204 si existe`() {
+        whenever(organizadorService.eliminarOrganizador(1)).thenReturn(true)
+
+        mockMvc.perform(delete("/organizadores/1"))
+            .andExpect(status().isNoContent)
+    }
+
+    @Test
+    fun `eliminar organizador devuelve 404 si no existe`() {
+        whenever(organizadorService.eliminarOrganizador(99)).thenReturn(false)
+
+        mockMvc.perform(delete("/organizadores/99"))
+            .andExpect(status().isNotFound)
     }
 }
