@@ -1,22 +1,28 @@
 package org.example.src.models
 
 import jakarta.persistence.*
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "usuarios")
 class Asistente(
     final override var id: Int = 0,
-    @Column(nullable = false, unique = true)
-    override val username: String,
+    @Column(nullable = false)
+    override var username: String,
 
     @Column(nullable = false, unique = true)
-    final override val correo: String,
+    final override var correo: String,
 
     @Column(nullable = false)
-    final override val password: String,
+    final override var password: String,
 
-    @Column(name="profile_pic")
-    final override var profile_pic: String=""
+    @Column(name="avatar_url")
+    final override var profile_pic: String?="",
+
+    @Column(name = "created_at", updatable = false)
+    override var fechaCreacion: LocalDateTime = LocalDateTime.now()
+
+
 
 ) : User () {
 
@@ -29,13 +35,12 @@ class Asistente(
     // Relación con categorías/intereses
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "asistente_categorias",
-        joinColumns = [JoinColumn(name = "asistente_id")],
-        inverseJoinColumns = [JoinColumn(name = "categoria_id")]
+        name = "tags",
+        joinColumns = [JoinColumn(name = "usuario_id")],
+        inverseJoinColumns = [JoinColumn(name = "categorias_id")]
     )
 
 
-    val tags: MutableList<Categoria> = mutableListOf()
     // Métodos específicos de Asistente
     fun seguirOrganizador(organizador: Organizador) {
         if (!organizadoresSeguidos.contains(organizador)) {

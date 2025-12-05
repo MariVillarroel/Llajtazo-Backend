@@ -7,10 +7,9 @@ class CreadorUser {
         correo: String,
         password: String,
         profile_pic: String = "",
-        // Parámetros opcionales para tipos específicos
-        nombre_org: String? = null,
-        numero: String? = null,
-        nombreCompleto: String? = null
+        about: String? = null,
+        //followers: Int = 0,
+        suscribed: Boolean = false
     ): User {
         return when (tipo.lowercase()) {
             "organizador" -> Organizador(
@@ -18,8 +17,9 @@ class CreadorUser {
                 correo = correo,
                 password = password,
                 profile_pic = profile_pic,
-                nombre_org = nombre_org ?: "",  // Usar si viene, sino vacío
-                numero = numero ?: ""
+                about = about,
+                //followers = followers,
+                suscribed = suscribed
             )
             "asistente" -> Asistente(
                 username = username,

@@ -2,6 +2,7 @@ package org.example.src.controllers
 
 import org.example.src.dto.*
 import org.example.src.services.OrganizadorService
+import org.example.src.services.SuscripcionService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -9,7 +10,8 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/organizadores")
 class OrganizadorController(
-    private val organizadorService: OrganizadorService
+    private val organizadorService: OrganizadorService,
+    private val suscripcionService: SuscripcionService
 ) {
 
     // 🆕 ENDPOINT DE LOGIN
@@ -18,7 +20,15 @@ class OrganizadorController(
         return try {
             val organizador = organizadorService.login(request.correo, request.password)
             if (organizador != null) {
-                ResponseEntity.ok(organizador)
+                // ✅ Incluir información de suscripción en login
+                val suscripcion = suscripcionService.obtenerPorOrganizadorId(organizador.id)
+                val response = mapOf(
+                    "organizador" to organizador,
+                    "suscripcion" to suscripcion?.let { SuscripcionResponseDTO.fromSuscripcion(it) },
+                    "estaSuscrito" to organizador.estaSuscrito,  // Método actualizado
+                    "tienePremium" to (suscripcion?.tienePremiumActivo ?: false)  // Propiedad calculada
+                )
+                ResponseEntity.ok(response)
             } else {
                 ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(mapOf("error" to "Credenciales inválidas"))
@@ -35,7 +45,6 @@ class OrganizadorController(
             val response = organizadorService.crearOrganizador(request)
             ResponseEntity.status(HttpStatus.CREATED).body(response)
         } catch (e: IllegalArgumentException) {
-            // Captura errores de validación
             ResponseEntity.badRequest().body(mapOf(
                 "error" to e.message,
                 "type" to "VALIDATION_ERROR"
@@ -46,20 +55,49 @@ class OrganizadorController(
         }
     }
 
-    // 📋 LISTAR ORGANIZADORES (sin cambios)
+    // 📋 LISTAR ORGANIZADORES (✅ NUEVO: Filtrar por suscripción)
     @GetMapping
-    fun listarOrganizadores(): ResponseEntity<List<OrganizadorResponse>> {
-        val lista = organizadorService.listarOrganizadores()
-        return ResponseEntity.ok(lista)
+    fun listarOrganizadores(
+        @RequestParam(required = false) suscritos: Boolean? = null
+    ): ResponseEntity<Any> {
+        return try {
+            val lista = if (suscritos == true) {
+                // ✅ NUEVO: Solo organizadores suscritos
+                organizadorService.listarOrganizadoresSuscritos()
+            } else if (suscritos == false) {
+                // ✅ NUEVO: Solo organizadores NO suscritos
+                organizadorService.listarOrganizadores().filter { !it.estaSuscrito }
+            } else {
+                // Todos los organizadores
+                organizadorService.listarOrganizadores()
+            }
+            ResponseEntity.ok(lista)
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "Error al listar organizadores"))
+        }
     }
 
-    // 👤 OBTENER POR ID (mejor manejo de errores)
+    // 👤 OBTENER POR ID (✅ MEJORADO: Incluye info de suscripción completa)
     @GetMapping("/{id}")
     fun obtenerOrganizadorPorId(@PathVariable id: Int): ResponseEntity<Any> {
         return try {
             val organizador = organizadorService.obtenerOrganizadorPorId(id)
             if (organizador != null) {
-                ResponseEntity.ok(organizador)
+                // ✅ NUEVO: Obtener información completa de suscripción
+                val suscripcion = suscripcionService.obtenerPorOrganizadorId(id)
+                val infoCompleta = mapOf(
+                    "organizador" to organizador,
+                    "suscripcion" to suscripcion?.let { SuscripcionResponseDTO.fromSuscripcion(it) },
+                    "estadoSuscripcion" to mapOf(
+                        "estaSuscrito" to organizador.estaSuscrito,
+                        "tieneSuscripcionActiva" to suscripcionService.tieneSuscripcionActiva(id),
+                        "puedeCrearEventos" to suscripcionService.puedeCrearEventos(id),
+                        "diasRestantes" to suscripcionService.obtenerDiasRestantes(id),
+                        "planActual" to suscripcionService.obtenerPlanActual(id)
+                    )
+                )
+                ResponseEntity.ok(infoCompleta)
             } else {
                 ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(mapOf("error" to "Organizador no encontrado"))
@@ -70,7 +108,79 @@ class OrganizadorController(
         }
     }
 
-    // ✏️ ACTUALIZAR ORGANIZADOR (con validaciones)
+    // ✅ **NUEVO ENDPOINT: Obtener información COMPLETA de organizador con suscripción**
+    @GetMapping("/{id}/info-completa")
+    fun obtenerOrganizadorCompleto(@PathVariable id: Int): ResponseEntity<Any> {
+        return try {
+            val organizadorCompleto = organizadorService.obtenerOrganizadorCompleto(id)
+            if (organizadorCompleto != null) {
+                ResponseEntity.ok(organizadorCompleto)
+            } else {
+                ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(mapOf("error" to "Organizador no encontrado"))
+            }
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "Error al obtener información completa"))
+        }
+    }
+
+    // ✅ **NUEVO ENDPOINT: Verificar tipo de suscripción (PREMIUM/GRATUITO)**
+    @GetMapping("/{id}/tipo-suscripcion")
+    fun obtenerTipoSuscripcion(@PathVariable id: Int): ResponseEntity<Any> {
+        return try {
+            val tipo = suscripcionService.obtenerPlanActual(id)
+            ResponseEntity.ok(mapOf(
+                "organizadorId" to id,
+                "tipoSuscripcion" to tipo,
+                "esPremium" to (tipo == "PREMIUM"),
+                "esGratuito" to (tipo == "GRATUITO")
+            ))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "Error al obtener tipo de suscripción"))
+        }
+    }
+
+    // ✅ **NUEVO ENDPOINT: Verificar si puede crear eventos**
+    @GetMapping("/{id}/puede-crear-eventos")
+    fun puedeCrearEventos(@PathVariable id: Int): ResponseEntity<Any> {
+        return try {
+            val puede = suscripcionService.puedeCrearEventos(id)
+            ResponseEntity.ok(mapOf(
+                "organizadorId" to id,
+                "puedeCrearEventos" to puede,
+                "mensaje" to if (puede) "Puede crear eventos" else "No puede crear eventos"
+            ))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "Error al verificar permisos"))
+        }
+    }
+
+    // ✅ **NUEVO ENDPOINT: Obtener eventos disponibles**
+    @GetMapping("/{id}/eventos-disponibles")
+    fun obtenerEventosDisponibles(@PathVariable id: Int): ResponseEntity<Any> {
+        return try {
+            val disponibles = organizadorService.eventosDisponibles(id)
+            ResponseEntity.ok(mapOf(
+                "organizadorId" to id,
+                "eventosDisponibles" to disponibles,
+                "tieneIlimitados" to (disponibles == Int.MAX_VALUE),
+                "limite" to if (disponibles == Int.MAX_VALUE) "ILIMITADO" else "3 (gratis)",
+                "mensaje" to when {
+                    disponibles == Int.MAX_VALUE -> "Tienes eventos ilimitados (suscripción PREMIUM)"
+                    disponibles > 0 -> "Te quedan $disponibles eventos gratis"
+                    else -> "No tienes eventos disponibles"
+                }
+            ))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "Error al obtener eventos disponibles"))
+        }
+    }
+
+    // ✏️ ACTUALIZAR ORGANIZADOR (con validaciones) - SIN CAMBIOS
     @PutMapping("/{id}")
     fun actualizarOrganizador(
         @PathVariable id: Int,
@@ -132,6 +242,44 @@ class OrganizadorController(
             ResponseEntity.ok(mapOf("valido" to esValido))
         } catch (e: Exception) {
             ResponseEntity.badRequest().body(mapOf("error" to e.message))
+        }
+    }
+
+    // ✅ **NUEVO ENDPOINT: Suscribir organizador**
+    @PostMapping("/{id}/suscribir")
+    fun suscribirOrganizador(@PathVariable id: Int): ResponseEntity<Any> {
+        return try {
+            val response = organizadorService.suscribirOrganizador(id)
+            ResponseEntity.ok(mapOf(
+                "mensaje" to "Organizador suscrito exitosamente",
+                "organizador" to response,
+                "estaSuscrito" to true
+            ))
+        } catch (e: NoSuchElementException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("error" to "Organizador no encontrado"))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "Error al suscribir organizador"))
+        }
+    }
+
+    // ✅ **NUEVO ENDPOINT: Cancelar suscripción de organizador**
+    @PostMapping("/{id}/cancelar-suscripcion")
+    fun cancelarSuscripcionOrganizador(@PathVariable id: Int): ResponseEntity<Any> {
+        return try {
+            val response = organizadorService.cancelarSuscripcion(id)
+            ResponseEntity.ok(mapOf(
+                "mensaje" to "Suscripción cancelada exitosamente",
+                "organizador" to response,
+                "estaSuscrito" to false
+            ))
+        } catch (e: NoSuchElementException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("error" to "Organizador no encontrado"))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "Error al cancelar suscripción"))
         }
     }
 }

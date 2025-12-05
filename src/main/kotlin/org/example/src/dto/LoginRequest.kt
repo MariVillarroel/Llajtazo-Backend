@@ -1,6 +1,8 @@
 package org.example.src.dto
 
+import jakarta.validation.constraints.NotBlank
+
 data class LoginRequest(
-    val correo: String,
-    val password: String
+    @field:NotBlank val correo: String,
+    @field:NotBlank val password: String
 )

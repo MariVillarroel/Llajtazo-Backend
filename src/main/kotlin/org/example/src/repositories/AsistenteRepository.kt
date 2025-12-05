@@ -9,14 +9,13 @@ import org.springframework.stereotype.Repository
 @Repository
 interface AsistenteRepository : JpaRepository<Asistente, Int> {
 
-    // ✅ Spring genera automáticamente
     fun findByCorreo(correo: String): Asistente?
     fun existsByCorreo(correo: String): Boolean
     fun existsByUsername(username: String): Boolean
     fun findByUsername(username: String): Asistente?
-    // ✅ Consultas relacionadas con categorías/intereses
+
     @Query("SELECT a FROM Asistente a JOIN a.tags t WHERE t.id = :categoriaId")
-    fun findByCategoriaId(@Param("categoriaId") categoriaId: Int): List<Asistente>
+    fun findByTagsId(@Param("categoriaId") categoriaId: Int): List<Asistente>
 
     @Query("SELECT a FROM Asistente a WHERE a.nombreCompleto LIKE %:nombre%")
     fun buscarPorNombre(@Param("nombre") nombre: String): List<Asistente>

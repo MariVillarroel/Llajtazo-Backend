@@ -9,12 +9,23 @@ import org.springframework.stereotype.Repository
 @Repository
 interface OrganizadorRepository : JpaRepository<Organizador, Int> {
 
-    // ✅ Spring genera automáticamente
-    fun findByCorreo(correo: String): Organizador?
-    fun existsByCorreo(correo: String): Boolean
-    fun existsByUsername(username: String): Boolean
+    fun findByUsername(username: String): Organizador?
 
-    // ✅ Consultas personalizadas si necesitas
+    fun findByCorreo(correo: String): Organizador?
+
+    fun existsByUsername(username: String): Boolean
+    fun existsByCorreo(correo: String): Boolean
+
+    @Query("SELECT o FROM Organizador o WHERE o.suscribed = :suscribed")
+    fun findAllBySuscribed(@Param("suscribed") suscribed: Boolean): List<Organizador>
+
+    @Query("""
+        SELECT o FROM Organizador o 
+        WHERE o.suscripcion IS NOT NULL 
+        AND o.suscripcion.estado = 'ACTIVA'
+    """)
+    fun findAllConSuscripcionActiva(): List<Organizador>
+
     @Query("SELECT o FROM Organizador o WHERE o.nombre_org LIKE %:nombre%")
     fun buscarPorNombreOrganizacion(@Param("nombre") nombre: String): List<Organizador>
 

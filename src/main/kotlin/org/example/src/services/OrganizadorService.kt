@@ -1,5 +1,6 @@
 package org.example.src.services
 
+import org.example.src.dto.OrganizadorConSuscripcionDTO
 import org.example.src.dto.OrganizadorRequest
 import org.example.src.dto.OrganizadorResponse
 import org.example.src.dto.UpdateOrganizadorRequest
@@ -13,40 +14,27 @@ import java.util.NoSuchElementException
 
 @Service
 @Transactional
-class OrganizadorService(private val repository: OrganizadorRepository) {
+class OrganizadorService(private val repository: OrganizadorRepository, private val suscripcionService: SuscripcionService) {
 
-    // 🔐 MÉTODO DE LOGIN
     @Transactional(readOnly = true)
     fun login(correo: String, password: String): OrganizadorResponse? {
         val organizador = repository.findByCorreo(correo) ?: return null
-
         return if (PasswordUtils.verifyPassword(password, organizador.password)) {
             OrganizadorResponse.fromEntity(organizador)
-        } else {
-            null
-        }
+        } else null
     }
 
-    // 🆕 CREAR ORGANIZADOR CON VALIDACIONES Y HASH
     fun crearOrganizador(request: OrganizadorRequest): OrganizadorResponse {
-        // ✅ VALIDACIONES BÁSICAS
         if (!ValidationUtils.isValidEmail(request.correo)) {
             throw IllegalArgumentException("Formato de correo electrónico inválido")
         }
-
         if (!ValidationUtils.isStrongPassword(request.password)) {
             throw IllegalArgumentException("La contraseña debe tener al menos 6 caracteres")
         }
-
         if (!ValidationUtils.isValidUsername(request.username)) {
-            throw IllegalArgumentException("Username debe tener entre 3 y 50 caracteres y solo letras, números, _ o .")
+            throw IllegalArgumentException("Username inválido")
         }
 
-        if (!ValidationUtils.isValidPhoneNumber(request.numero)) {
-            throw IllegalArgumentException("Número de teléfono inválido. Use solo números, máximo 15 dígitos")
-        }
-
-        // ✅ VALIDAR UNICIDAD
         if (repository.findByCorreo(request.correo) != null) {
             throw IllegalArgumentException("El correo ya está registrado")
         }
@@ -54,119 +42,112 @@ class OrganizadorService(private val repository: OrganizadorRepository) {
             throw IllegalArgumentException("El username ya está en uso")
         }
 
-        // 🔐 HASHEAR CONTRASEÑA
         val hashedPassword = PasswordUtils.hashPassword(request.password)
 
         val organizador = Organizador(
             username = request.username,
             correo = request.correo,
-            password = hashedPassword, // ✅ Password hasheado
-            profile_pic = request.profilePic,
-            nombre_org = request.nombreOrg,
-            numero = request.numero
+            password = hashedPassword,
+            profile_pic = request.profilePic
         )
 
         val saved = repository.save(organizador)
         return OrganizadorResponse.fromEntity(saved)
     }
 
-    // 📋 LISTAR ORGANIZADORES (sin cambios)
     @Transactional(readOnly = true)
     fun listarOrganizadores(): List<OrganizadorResponse> =
         repository.findAll().map { OrganizadorResponse.fromEntity(it) }
 
-    // 👤 OBTENER POR ID (sin cambios)
     @Transactional(readOnly = true)
     fun obtenerOrganizadorPorId(id: Int): OrganizadorResponse? {
         val organizador = repository.findById(id).orElse(null) ?: return null
         return OrganizadorResponse.fromEntity(organizador)
     }
 
-    // ✏️ ACTUALIZAR ORGANIZADOR MEJORADO
     fun actualizarOrganizador(id: Int, request: UpdateOrganizadorRequest): OrganizadorResponse {
         val organizador = repository.findById(id)
             .orElseThrow { NoSuchElementException("Organizador con id $id no encontrado") }
 
-        // ✅ VALIDACIONES EN UPDATE
-        request.correo?.let { nuevoCorreo ->
-            if (!ValidationUtils.isValidEmail(nuevoCorreo)) {
-                throw IllegalArgumentException("Formato de correo electrónico inválido")
+        request.correo?.let {
+            if (!ValidationUtils.isValidEmail(it)) throw IllegalArgumentException("Correo inválido")
+            if (it != organizador.correo && repository.findByCorreo(it) != null) {
+                throw IllegalArgumentException("El correo $it ya está registrado")
             }
-            if (nuevoCorreo != organizador.correo) {
-                val organizadorExistente = repository.findByCorreo(nuevoCorreo)
-                if (organizadorExistente != null) {
-                    throw IllegalArgumentException("El correo $nuevoCorreo ya está registrado")
-                }
-            }
+            organizador.correo = it
         }
 
-        request.username?.let { nuevoUsername ->
-            if (nuevoUsername != organizador.username) {
-                if (!ValidationUtils.isValidUsername(nuevoUsername)) {
-                    throw IllegalArgumentException("Username inválido")
-                }
-                if (repository.existsByUsername(nuevoUsername)) {
-                    throw IllegalArgumentException("El username $nuevoUsername ya está en uso")
-                }
+        request.username?.let {
+            if (!ValidationUtils.isValidUsername(it)) throw IllegalArgumentException("Username inválido")
+            if (it != organizador.username && repository.existsByUsername(it)) {
+                throw IllegalArgumentException("El username $it ya está en uso")
             }
+            organizador.username = it
         }
 
-        request.password?.let { nuevoPassword ->
-            if (!ValidationUtils.isStrongPassword(nuevoPassword)) {
-                throw IllegalArgumentException("La nueva contraseña no cumple con los requisitos mínimos")
-            }
+        request.password?.let {
+            if (!ValidationUtils.isStrongPassword(it)) throw IllegalArgumentException("Contraseña inválida")
+            organizador.password = PasswordUtils.hashPassword(it)
         }
 
-        request.numero?.let { nuevoNumero ->
-            if (!ValidationUtils.isValidPhoneNumber(nuevoNumero)) {
-                throw IllegalArgumentException("Número de teléfono inválido")
-            }
-        }
+        request.profilePic?.let { organizador.profile_pic = it }
 
-        // 🔐 HASHEAR NUEVA CONTRASEÑA SI SE PROVEE
-        val passwordToUpdate = request.password?.let { PasswordUtils.hashPassword(it) }
 
-        // ✅ ACTUALIZAR PERFIL CON PASSWORD HASHEADO
-        organizador.actualizarPerfil(
-            nuevoUsername = request.username,
-            nuevoCorreo = request.correo,
-            nuevoPassword = passwordToUpdate, // ✅ Usar hash si se proporcionó nueva contraseña
-            nuevaProfilePic = request.profilePic,
-            nuevoNombreOrg = request.nombreOrg,
-            nuevoNumero = request.numero
-        )
-
-        val organizadorActualizado = repository.save(organizador)
-        return OrganizadorResponse.fromEntity(organizadorActualizado)
+        val saved = repository.save(organizador)
+        return OrganizadorResponse.fromEntity(saved)
     }
 
-    // 🗑️ ELIMINAR ORGANIZADOR (sin cambios)
     fun eliminarOrganizador(id: Int): Boolean {
         return if (repository.existsById(id)) {
             repository.deleteById(id)
             true
-        } else {
-            false
-        }
+        } else false
     }
 
-    // 🔍 BUSCAR POR CORREO (sin cambios)
     @Transactional(readOnly = true)
     fun buscarPorCorreo(correo: String): OrganizadorResponse? {
         val organizador = repository.findByCorreo(correo) ?: return null
         return OrganizadorResponse.fromEntity(organizador)
     }
 
-    // ✅ VERIFICAR EXISTENCIA (sin cambios)
     @Transactional(readOnly = true)
-    fun existeOrganizador(id: Int): Boolean {
-        return repository.existsById(id)
-    }
+    fun existeOrganizador(id: Int): Boolean = repository.existsById(id)
 
-    // 🔐 VERIFICAR CREDENCIALES (método utilitario)
     @Transactional(readOnly = true)
     fun verificarCredenciales(correo: String, password: String): Boolean {
         val organizador = repository.findByCorreo(correo) ?: return false
         return PasswordUtils.verifyPassword(password, organizador.password)
     }
+    // En OrganizadorService.kt - Agregar si faltan:
+    fun listarOrganizadoresSuscritos(): List<OrganizadorResponse> {
+        return repository.findAllBySuscribed(true)
+            .map { OrganizadorResponse.fromEntity(it) }
+    }
+
+    fun obtenerOrganizadorCompleto(id: Int): OrganizadorConSuscripcionDTO? {
+        val organizador = repository.findById(id).orElse(null) ?: return null
+        return OrganizadorConSuscripcionDTO.fromOrganizador(organizador)
+    }
+
+    fun eventosDisponibles(organizadorId: Int): Int {
+        val organizador = repository.findById(organizadorId).orElse(null) ?: return 0
+        return if (organizador.suscribed) Int.MAX_VALUE else maxOf(0, 3 - organizador.eventosCreados.size)
+    }
+
+    fun suscribirOrganizador(organizadorId: Int): OrganizadorResponse {
+        val organizador = repository.findById(organizadorId)
+            .orElseThrow { NoSuchElementException("Organizador no encontrado") }
+        organizador.suscribed = true
+        val saved = repository.save(organizador)
+        return OrganizadorResponse.fromEntity(saved)
+    }
+
+    fun cancelarSuscripcion(organizadorId: Int): OrganizadorResponse {
+        val organizador = repository.findById(organizadorId)
+            .orElseThrow { NoSuchElementException("Organizador no encontrado") }
+        organizador.suscribed = false
+        val saved = repository.save(organizador)
+        return OrganizadorResponse.fromEntity(saved)
+    }
+
 }
