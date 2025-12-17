@@ -1,13 +1,12 @@
 package org.example.src.controllers
 
-import org.example.src.dto.CreateEventoRequest
+import org.example.src.dto.EventoRequest
 import org.example.src.dto.EventoResponse
 import org.example.src.dto.UpdateEventoRequest
 import org.example.src.services.EventoService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.util.NoSuchElementException
 
 @RestController
 @RequestMapping("/eventos")
@@ -16,7 +15,7 @@ class EventoController(
 ) {
 
     @PostMapping
-    fun crearEvento(@RequestBody request: CreateEventoRequest): ResponseEntity<EventoResponse> {
+    fun crearEvento(@RequestBody request: EventoRequest): ResponseEntity<EventoResponse> {
         val response = eventoService.crearEvento(request)
         return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
@@ -24,7 +23,11 @@ class EventoController(
     @GetMapping("/{id}")
     fun obtenerEvento(@PathVariable id: Int): ResponseEntity<EventoResponse> {
         val evento = eventoService.obtenerEvento(id)
-        return ResponseEntity.ok(evento)
+        return if (evento != null) {
+            ResponseEntity.ok(evento)
+        } else {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+        }
     }
 
     @GetMapping("/futuros")
@@ -35,12 +38,9 @@ class EventoController(
     fun listarPorOrganizador(@PathVariable organizadorId: Int): ResponseEntity<List<EventoResponse>> =
         ResponseEntity.ok(eventoService.listarEventosPorOrganizador(organizadorId))
 
-    @PatchMapping("/{id}")
-    fun actualizarEvento(
-        @PathVariable id: Int,
-        @RequestBody request: UpdateEventoRequest
-    ): ResponseEntity<EventoResponse> {
-        val response = eventoService.actualizarEvento(id, request)
+    @PatchMapping
+    fun actualizarEvento(@RequestBody request: UpdateEventoRequest): ResponseEntity<EventoResponse> {
+        val response = eventoService.actualizarEvento(request)
         return ResponseEntity.ok(response)
     }
 
@@ -53,5 +53,3 @@ class EventoController(
         }
     }
 }
-
-

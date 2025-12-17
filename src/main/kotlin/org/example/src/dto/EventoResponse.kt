@@ -1,6 +1,7 @@
 package org.example.src.dto
 
 import java.time.LocalDateTime
+import org.example.src.models.EventoEntity
 
 data class EventoResponse(
     val id: Int,
@@ -19,22 +20,22 @@ data class EventoResponse(
     val categoriaNombre: String?
 ) {
     companion object {
-        fun fromEntity(eventoBasico: org.example.src.models.EventoBasico): EventoResponse =
+        fun fromEntity(eventoEntity: EventoEntity): EventoResponse =
             EventoResponse(
-                id = eventoBasico.id,
-                titulo = eventoBasico.titulo,
-                descripcion = eventoBasico.descripcion,
-                startTime = eventoBasico.startTime,
-                endTime = eventoBasico.endTime,
-                estado = eventoBasico.estado,
-                coverUrl = eventoBasico.coverUrl,
-                organizadorId = eventoBasico.organizador?.id,
-                organizadorNombre = eventoBasico.organizador?.getNombreCompleto(),
-                lugarId = eventoBasico.lugar?.id,
-                lugarNombre = eventoBasico.lugar?.name,
-                lugarDireccion = eventoBasico.lugar?.address,
-                categoriaId = eventoBasico.categoria?.id,
-                categoriaNombre = eventoBasico.categoria?.nombre
+                id = eventoEntity.id,
+                titulo = eventoEntity.titulo,
+                descripcion = eventoEntity.descripcion,
+                startTime = eventoEntity.startTime,
+                endTime = eventoEntity.endTime,
+                estado = eventoEntity.estado,
+                coverUrl = eventoEntity.coverUrl,
+                organizadorId = eventoEntity.organizador?.id,
+                organizadorNombre = eventoEntity.organizador?.getNombreCompleto(),
+                lugarId = eventoEntity.lugar?.id,
+                lugarNombre = eventoEntity.lugar?.name,
+                lugarDireccion = eventoEntity.lugar?.address,
+                categoriaId = eventoEntity.categoria?.id,
+                categoriaNombre = eventoEntity.categoria?.nombre
             )
     }
 }

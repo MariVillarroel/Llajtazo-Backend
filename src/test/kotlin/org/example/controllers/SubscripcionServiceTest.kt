@@ -106,7 +106,7 @@ class SuscripcionServiceTest {
 
         // Mock de métodos del organizador que fromSuscripcion podría necesitar
         `when`(organizadorMock.puedeCrearEventos()).thenReturn(true)
-        `when`(organizadorMock.eventosCreados).thenReturn(mutableListOf<EventoBasico>())
+        `when`(organizadorMock.eventosCreados).thenReturn(mutableListOf<EventoEntity>())
 
         // Configurar la relación inversa
         `when`(suscripcionMock.organizador).thenReturn(organizadorMock)

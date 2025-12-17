@@ -94,7 +94,7 @@ class SuscripcionControllerTest @Autowired constructor(
         `when`(organizadorMock.username).thenReturn("org1")
         `when`(organizadorMock.correo).thenReturn("org1@example.com")
         `when`(organizadorMock.puedeCrearEventos()).thenReturn(true)
-        `when`(organizadorMock.eventosCreados).thenReturn(mutableListOf<EventoBasico>())
+        `when`(organizadorMock.eventosCreados).thenReturn(mutableListOf<EventoEntity>())
         `when`(organizadorMock.eventosDisponibles()).thenReturn(Int.MAX_VALUE)
 
         // Crear suscripción con id (necesario para el DTO)

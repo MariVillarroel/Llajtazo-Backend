@@ -13,7 +13,7 @@ class TipoTicket(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evento_id", nullable = false)
-    var eventoBasico: EventoBasico,
+    var eventoEntity: EventoEntity,
 
     @Column(name = "nombre", nullable = false)
     var nombre: String,

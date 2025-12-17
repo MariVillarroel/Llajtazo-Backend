@@ -1,10 +1,10 @@
 package org.example.src.services
 
-import org.example.src.dto.CreateEventoRequest
+import org.example.src.dto.EventoRequest
 import org.example.src.dto.EventoResponse
 import org.example.src.dto.UpdateEventoRequest
 import org.example.src.models.Categoria
-import org.example.src.models.EventoBasico
+import org.example.src.models.EventoEntity
 import org.example.src.models.Location
 import org.example.src.models.Organizador
 import org.example.src.repositories.CategoriaRepository
@@ -24,8 +24,7 @@ class EventoService(
     private val locationRepository: LocationRepository,
     private val categoriaRepository: CategoriaRepository
 ) {
-
-    fun crearEvento(request: CreateEventoRequest): EventoResponse {
+    fun crearEvento(request: EventoRequest): EventoResponse {
         val organizador: Organizador? = request.organizadorId?.let {
             organizadorRepository.findById(it)
                 .orElseThrow { IllegalArgumentException("Organizador con id $it no existe") }
@@ -45,7 +44,7 @@ class EventoService(
             throw IllegalArgumentException("endTime no puede ser antes de startTime")
         }
 
-        val eventoBasico = EventoBasico(
+        val eventoEntity = EventoEntity(
             organizador = organizador,
             lugar = lugar,
             categoria = categoria,
@@ -54,10 +53,11 @@ class EventoService(
             startTime = request.startTime,
             endTime = request.endTime,
             coverUrl = request.coverUrl,
-            estado = request.estado ?: "PUBLISHED"
+            estado = request.estado ?: "PUBLISHED",
+            tipoEvento = request.tipoEvento ?: "B"
         )
 
-        val saved = eventoRepository.save(eventoBasico)
+        val saved = eventoRepository.save(eventoEntity)
         return EventoResponse.fromEntity(saved)
     }
 
@@ -82,9 +82,9 @@ class EventoService(
         return eventos.map { EventoResponse.fromEntity(it) }
     }
 
-    fun actualizarEvento(id: Int, request: UpdateEventoRequest): EventoResponse {
-        val evento = eventoRepository.findById(id)
-            .orElseThrow { NoSuchElementException("Evento con id $id no encontrado") }
+    fun actualizarEvento(request: UpdateEventoRequest): EventoResponse {
+        val evento = eventoRepository.findById(request.id)
+            .orElseThrow { NoSuchElementException("Evento con id ${request.id} no encontrado") }
 
         request.lugarId?.let {
             evento.lugar = locationRepository.findById(it)
@@ -108,19 +108,16 @@ class EventoService(
         evento.endTime = nuevoEnd
         evento.coverUrl = request.coverUrl ?: evento.coverUrl
         evento.estado = request.estado ?: evento.estado
+        evento.tipoEvento = request.tipoEvento ?: evento.tipoEvento
 
         val saved = eventoRepository.save(evento)
         return EventoResponse.fromEntity(saved)
     }
 
-
-
     fun eliminarEvento(id: Int): Boolean {
-        return if (eventoRepository.existsById(id)) {
-            eventoRepository.deleteById(id)
+        return eventoRepository.findById(id).map {
+            eventoRepository.delete(it)
             true
-        } else {
-            false
-        }
+        }.orElse(false)
     }
 }

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.example.src.controllers.OrganizadorController
 import org.example.src.dto.LoginRequest
 import org.example.src.dto.OrganizadorResponse
-import org.example.src.dto.SuscripcionResponseDTO
-import org.example.src.dto.UltimoPagoDTO
 import org.example.src.models.*
 import org.example.src.services.OrganizadorService
 import org.example.src.services.SuscripcionService
@@ -61,7 +59,7 @@ class OrganizadorControllerExtraTest @Autowired constructor(
         `when`(organizadorMock.username).thenReturn("org1")
         `when`(organizadorMock.correo).thenReturn("org1@example.com")
         `when`(organizadorMock.puedeCrearEventos()).thenReturn(true)
-        `when`(organizadorMock.eventosCreados).thenReturn(mutableListOf<EventoBasico>())
+        `when`(organizadorMock.eventosCreados).thenReturn(mutableListOf<EventoEntity>())
         `when`(organizadorMock.eventosDisponibles()).thenReturn(Int.MAX_VALUE)
 
         // 3. Crear un mock COMPLETO de Suscripcion usando las propiedades nuevas
@@ -166,7 +164,7 @@ class OrganizadorControllerExtraTest @Autowired constructor(
         `when`(organizadorMock.username).thenReturn("org1")
         `when`(organizadorMock.correo).thenReturn("org1@example.com")
         `when`(organizadorMock.puedeCrearEventos()).thenReturn(true)
-        `when`(organizadorMock.eventosCreados).thenReturn(mutableListOf<EventoBasico>())
+        `when`(organizadorMock.eventosCreados).thenReturn(mutableListOf<EventoEntity>())
 
         val suscripcionMock = mock(Suscripcion::class.java)
         `when`(suscripcionMock.id).thenReturn(1)
@@ -246,7 +244,7 @@ class OrganizadorControllerExtraTest @Autowired constructor(
         `when`(organizadorEnSuscripcionMock.username).thenReturn("org1")
         `when`(organizadorEnSuscripcionMock.correo).thenReturn("org1@example.com")
         `when`(organizadorEnSuscripcionMock.puedeCrearEventos()).thenReturn(false)
-        `when`(organizadorEnSuscripcionMock.eventosCreados).thenReturn(mutableListOf<EventoBasico>())
+        `when`(organizadorEnSuscripcionMock.eventosCreados).thenReturn(mutableListOf<EventoEntity>())
 
         `when`(suscripcionMock.organizador).thenReturn(organizadorEnSuscripcionMock)
 

@@ -31,7 +31,7 @@ class Organizador(
 
     // Relación con eventos
     @OneToMany(mappedBy = "organizador", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    var eventosCreados: MutableList<EventoBasico> = mutableListOf()
+    var eventosCreados: MutableList<EventoEntity> = mutableListOf()
 
     // Seguidores
     @ManyToMany(fetch = FetchType.LAZY)
@@ -140,12 +140,12 @@ class Organizador(
     }
 
     // Métodos existentes (con ajustes para la nueva lógica)
-    fun crearEvento(eventoBasico: EventoBasico) {
+    fun crearEvento(eventoEntity: EventoEntity) {
         if (!puedeCrearEventos()) {
             throw IllegalStateException("No puede crear más eventos. Suscríbete para crear más.")
         }
-        eventosCreados.add(eventoBasico)
-        eventoBasico.organizador = this
+        eventosCreados.add(eventoEntity)
+        eventoEntity.organizador = this
     }
 
     fun actualizarPerfil(
