@@ -17,6 +17,6 @@ interface AsistenteRepository : JpaRepository<Asistente, Int> {
     @Query("SELECT a FROM Asistente a JOIN a.tags t WHERE t.id = :categoriaId")
     fun findByTagsId(@Param("categoriaId") categoriaId: Int): List<Asistente>
 
-    @Query("SELECT a FROM Asistente a WHERE a.nombreCompleto LIKE %:nombre%")
+    @Query("SELECT a FROM Asistente a WHERE a.username LIKE %:nombre%")
     fun buscarPorNombre(@Param("nombre") nombre: String): List<Asistente>
 }

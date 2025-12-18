@@ -14,7 +14,7 @@ import java.util.NoSuchElementException
 
 @Service
 @Transactional
-class AsistenteService(
+open class AsistenteService(
     private val asistenteRepository: AsistenteRepository,
     private val categoriaRepository: CategoriaRepository
 ) {

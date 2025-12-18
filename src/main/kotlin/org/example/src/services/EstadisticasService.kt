@@ -14,7 +14,7 @@ import java.util.NoSuchElementException
 
 @Service
 @Transactional
-class EstadisticasService(
+open class EstadisticasService(
     private val estadisticasRepository: EstadisticasRepository,
     private val eventoRepository: EventoRepository
 ) {
