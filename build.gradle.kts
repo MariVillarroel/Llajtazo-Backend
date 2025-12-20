@@ -3,6 +3,8 @@ plugins {
     kotlin("plugin.spring") version "1.9.+"
     id("org.springframework.boot") version "3.1.5"
     id("io.spring.dependency-management") version "1.1.3"
+    kotlin("plugin.spring") version "1.9.10"
+
 }
 
 group = "org.llajtazo"
@@ -20,7 +22,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm:2.3.5")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:2.3.5")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:2.3.5")
-    implementation("mysql:mysql-connector-java:8.0.33")
+    //implementation("mysql:mysql-connector-java:8.0.33")
 
     // --- SPRING BOOT CORE ---
     implementation("org.springframework.boot:spring-boot-starter-web")

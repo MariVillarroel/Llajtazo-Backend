@@ -10,9 +10,7 @@ import org.springframework.stereotype.Repository
 interface OrganizadorRepository : JpaRepository<Organizador, Int> {
 
     fun findByUsername(username: String): Organizador?
-
     fun findByCorreo(correo: String): Organizador?
-
     fun existsByUsername(username: String): Boolean
     fun existsByCorreo(correo: String): Boolean
 
@@ -26,7 +24,7 @@ interface OrganizadorRepository : JpaRepository<Organizador, Int> {
     """)
     fun findAllConSuscripcionActiva(): List<Organizador>
 
-    @Query("SELECT o FROM Organizador o WHERE o.nombre_org LIKE %:nombre%")
+    @Query("SELECT o FROM Organizador o WHERE o.username LIKE %:nombre%")
     fun buscarPorNombreOrganizacion(@Param("nombre") nombre: String): List<Organizador>
 
     @Query("SELECT o FROM Organizador o WHERE SIZE(o.followers) >= :minSeguidores")
