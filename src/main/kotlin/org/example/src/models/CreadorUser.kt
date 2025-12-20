@@ -23,10 +23,12 @@ class CreadorUser {
             )
             "asistente" -> Asistente(
                 username = username,
+                nombreCompleto = username, // o recibirlo como parámetro
                 correo = correo,
                 password = password,
                 profile_pic = profile_pic
             )
+
             else -> throw IllegalArgumentException("Tipo de usuario no soportado: $tipo")
         }
     }

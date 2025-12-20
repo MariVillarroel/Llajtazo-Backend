@@ -49,6 +49,7 @@ class AsistenteService(
 
         val asistente = Asistente(
             username = request.username,
+            nombreCompleto = request.nombreCompleto, // <-- agrega esto
             correo = request.correo,
             password = hashedPassword,
             profile_pic = request.profilePic

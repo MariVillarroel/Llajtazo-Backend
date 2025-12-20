@@ -5,5 +5,7 @@ data class UserRequest(
     val correo: String,
     val password: String,
     val profilePic: String = "",
-    val categoriasIds: List<Int>? = null
+    val categoriasIds: List<Int>? = null,
+    val nombreCompleto: String
+
 )

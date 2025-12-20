@@ -2,7 +2,6 @@ package org.example.src.dto
 
 import java.time.LocalDateTime
 import org.example.src.models.EventoEntity
-
 data class EventoResponse(
     val id: Int,
     val titulo: String,
@@ -30,7 +29,7 @@ data class EventoResponse(
                 estado = eventoEntity.estado,
                 coverUrl = eventoEntity.coverUrl,
                 organizadorId = eventoEntity.organizador?.id,
-                organizadorNombre = eventoEntity.organizador?.getNombreCompleto(),
+                organizadorNombre = eventoEntity.organizador?.username,
                 lugarId = eventoEntity.lugar?.id,
                 lugarNombre = eventoEntity.lugar?.name,
                 lugarDireccion = eventoEntity.lugar?.address,
